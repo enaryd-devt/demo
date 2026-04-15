@@ -28,41 +28,25 @@
                                 <strong t-if="record.product_variant_count.value > 1">
                                     <field name="product_variant_count" /> Variants </strong>
                             </div>
-                                <span>
-                                    Price:
-                                    <field name="list_price"
-                                        widget="monetary"
-                                        options="{'currency_field': 'currency_id', 'field_digits': True}" />
-                                </span>
-
-                                <span>
+                            <span> Price: <field name="list_price" widget="monetary"
+                                    options="{'currency_field': 'currency_id', 'field_digits': True}" />
+                            </span>
+                            <span>
                                     Disponible:
                                     <field name="qty_available"/>
-                                </span>
-                            
+                            </span>
                             <field name="product_properties" widget="properties" />
-  
                         </main>
                     </div>
-
-                    <aside class="product-image-box">
-
+                    <aside>
                         <field name="image_128" widget="image" alt="Product"
-                            options="{'img_class': 'w-100 object-fit-contain product-image'}" />
-
-                        <span t-if="record.qty_available.raw_value &lt;= record.alert_quantity.raw_value"
-                            class="text-danger fw-bold d-block mt-1 text-center blink-alert">
-                            Alerte ⚠
-                        </span>
-
+                            options="{'img_class': 'w-100 object-fit-contain'}" />
                     </aside>
                 </t>
-
             </xpath>
-
         </field>
     </record>
-     <!-- ================================= list view ================================== -->
+
     <record id="product_template_tree_low_stock" model="ir.ui.view">
         <field name="name">product.template.tree.low.stock.alert</field>
         <field name="model">product.template</field>
@@ -74,16 +58,10 @@
                 <field name="qty_available" />
             </xpath>
             <xpath expr="//list" position="attributes">
-                <attribute name="decoration-bf">
-                    qty_available &lt;= alert_quantity and alert_quantity &gt; 0
-                </attribute>
-
-                <attribute name="decoration-danger">
-                    qty_available &lt;= alert_quantity and alert_quantity &gt; 0
-                </attribute>
-
+                <attribute name="decoration-danger"><![CDATA[
+                    qty_available <= alert_quantity and alert_quantity >= 0
+                ]]></attribute>
             </xpath>
-
         </field>
     </record>
 

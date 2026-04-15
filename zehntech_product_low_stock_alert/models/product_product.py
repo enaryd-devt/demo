@@ -2,7 +2,7 @@
 from odoo import models, fields, api
 
 class ProductProduct(models.Model):
-    _inherit = 'product.template'
+    _inherit = 'product.product'
 
     alert_quantity = fields.Float(string='Alert Quantity')
 
@@ -79,7 +79,7 @@ class ProductProduct(models.Model):
         users = self.env['res.users'].browse(user_ids)
         for user in users:
             self.env['mail.message'].create({
-                'model': 'product.template',
+                'model': 'product.product',
                 'res_id': product.id,
                 'author_id': self.env.user.partner_id.id,
                 'partner_ids': [(4, user.partner_id.id)],

@@ -43,30 +43,6 @@
     font-weight: bold;
 }
 
-.product-image-box {
-    width: 140px;   /* augmente la zone */
-    height: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.product-image {
-    max-height: 110px;
-    max-width: 110px;
-}
-
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-.blink-alert {
-    animation: blink 1s infinite;
-}
-
 
 
 
