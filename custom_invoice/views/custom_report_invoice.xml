@@ -129,7 +129,23 @@
         <span t-if="o.name != '/'" t-field="o.name"/>
         est arrêtée à la somme de :         
         <strong><span t-esc="o.amount_total_words"/> CFA</strong>.
+ 
     </div>
+
+       <br/><br/>
+    <t t-set="is_machine" t-value="any(line.product_id.categ_id.name == 'MACHINE' for line in o.invoice_line_ids)"/>
+
+    <tr>
+
+        <td colspan="2" style="padding-top:10px; font-weight:600;" class="text-primary">
+            <t t-if="is_machine">
+                Garantie 03 mois
+            </t>
+            <t t-else="">
+                Garantie 06 mois
+            </t>
+        </td>
+    </tr>
 </xpath>
 
 
@@ -464,6 +480,7 @@
          <span t-esc="datetime.datetime.now().strftime('%d/%m/%Y à %H:%M:%S')"/>
     </div>
 </xpath>
+
 
                 
     </template>

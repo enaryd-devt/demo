@@ -11,18 +11,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language: fr\n"
 
-#. module: sale
-#: model:ir.ui.menu,name:sale.sale_menu_root
-msgid "Sales"
-msgstr "Ventes"
-
 #. module: stock
 #: model:ir.ui.menu,name:stock.menu_stock_root
 msgid "Inventory"
 msgstr "Gestion de Stock"
 
 #. module: account
-#: model:ir.ui.menu,name:account.menu_finance
+#: model:ir.ui.menu,name:account.menu_account
 msgid "Invoicing"
 msgstr "Finances"
 
