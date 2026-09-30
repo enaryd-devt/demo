@@ -1,0 +1,7 @@
+<odoo noupdate="1">
+ <record id="seq_estate_property" model="ir.sequence"><field name="name">Propriété</field><field name="code">estate.property</field><field name="prefix">IMM/%(year)s/</field><field name="padding">5</field></record>
+ <record id="seq_estate_unit" model="ir.sequence"><field name="name">Local</field><field name="code">estate.unit</field><field name="prefix">UNIT/%(year)s/</field><field name="padding">5</field></record>
+ <record id="seq_estate_lease" model="ir.sequence"><field name="name">Bail</field><field name="code">estate.lease</field><field name="prefix">BAIL/%(year)s/</field><field name="padding">5</field></record>
+ <record id="seq_estate_schedule" model="ir.sequence"><field name="name">Échéance de loyer</field><field name="code">estate.schedule</field><field name="prefix">LOY/%(year)s/</field><field name="padding">5</field></record>
+ <record id="seq_estate_deposit" model="ir.sequence"><field name="name">Caution</field><field name="code">estate.deposit</field><field name="prefix">CAU/%(year)s/</field><field name="padding">5</field></record>
+</odoo>

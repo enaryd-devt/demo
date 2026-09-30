@@ -1,0 +1,11 @@
+<odoo>
+    <record id="estate_property_view_form_terminology" model="ir.ui.view">
+        <field name="name">estate.property.form.terminology</field>
+        <field name="model">estate.property</field>
+        <field name="inherit_id" ref="primetech_estate_management.estate_property_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button/field[@name='unit_count']" position="attributes"><attribute name="string">Locaux</attribute></xpath>
+            <xpath expr="//page[field[@name='unit_ids']]" position="attributes"><attribute name="string">Locaux</attribute></xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,4 @@
+<odoo noupdate="1">
+ <record id="ir_cron_estate_update_lease_state" model="ir.cron"><field name="name">Immobilier : mettre à jour les baux</field><field name="model_id" ref="model_estate_lease"/><field name="state">code</field><field name="code">model._cron_update_lease_states()</field><field name="interval_number">1</field><field name="interval_type">days</field></record>
+ <record id="ir_cron_estate_reminders" model="ir.cron"><field name="name">Immobilier : relances loyers</field><field name="model_id" ref="model_estate_rent_schedule"/><field name="state">code</field><field name="code">model._cron_create_due_activities()</field><field name="interval_number">1</field><field name="interval_type">days</field></record>
+</odoo>

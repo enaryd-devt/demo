@@ -1,0 +1,66 @@
+<odoo>
+    <!-- Les actions doivent être définies avant les menus qui les référencent. -->
+    <record id="estate_dashboard_action" model="ir.actions.client">
+        <field name="name">Tableau de bord</field>
+        <field name="tag">primetech_estate_management.dashboard</field>
+    </record>
+    <record id="estate_property_type_action" model="ir.actions.act_window">
+        <field name="name">Types d’immeubles</field>
+        <field name="res_model">estate.property.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="estate_unit_type_action" model="ir.actions.act_window">
+        <field name="name">Types de locaux</field>
+        <field name="res_model">estate.unit.type</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="estate_menu_root" name="Gestion immobilière" sequence="30"
+              groups="primetech_estate_management.group_estate_user"
+              web_icon="primetech_estate_management,static/description/icon.png"/>
+    <menuitem id="estate_menu_dashboard" name="Tableau de bord" parent="estate_menu_root"
+              action="estate_dashboard_action" sequence="1"/>
+
+    <menuitem id="estate_menu_assets" name="Parc immobilier" parent="estate_menu_root" sequence="10"/>
+    <menuitem id="estate_menu_property" name="Immeubles" parent="estate_menu_assets"
+              action="estate_property_action" sequence="1"/>
+    <menuitem id="estate_menu_unit" name="Locaux" parent="estate_menu_assets"
+              action="estate_unit_action" sequence="2"/>
+
+    <menuitem id="estate_menu_letting" name="Location" parent="estate_menu_root" sequence="20"/>
+    <menuitem id="estate_menu_tenants" name="Locataires" parent="estate_menu_letting"
+              action="estate_tenant_action" sequence="1"/>
+    <menuitem id="estate_menu_lease" name="Contrats" parent="estate_menu_letting"
+              action="estate_lease_action" sequence="2"/>
+    <menuitem id="estate_menu_schedule" name="Échéances" parent="estate_menu_letting"
+              action="estate_schedule_action" sequence="3"/>
+    <menuitem id="estate_menu_unpaid" name="Impayés" parent="estate_menu_letting"
+              action="estate_schedule_action" sequence="4"/>
+    <menuitem id="estate_menu_deposit" name="Cautions" parent="estate_menu_letting"
+              action="estate_deposit_action" sequence="5"/>
+    <menuitem id="estate_menu_deposit_payment" name="Versements de cautions" parent="estate_menu_letting"
+              action="estate_deposit_payment_action" sequence="6"/>
+
+    <menuitem id="estate_menu_operation" name="Exploitation" parent="estate_menu_root" sequence="30"/>
+    <menuitem id="estate_menu_charge" name="Charges" parent="estate_menu_operation"
+              action="estate_charge_action" sequence="1"/>
+    <menuitem id="estate_menu_maintenance" name="Maintenance des locaux" parent="estate_menu_operation"
+              action="estate_maintenance_request_action" sequence="2"
+              groups="primetech_estate_management.group_estate_manager"/>
+
+    <menuitem id="estate_menu_accounting" name="Comptabilité" parent="estate_menu_root" sequence="40"
+              groups="primetech_estate_management.group_estate_manager"/>
+    <menuitem id="estate_menu_invoices" name="Factures de loyers" parent="estate_menu_accounting"
+              action="account.action_move_out_invoice_type" sequence="1"/>
+    <menuitem id="estate_menu_payments" name="Paiements" parent="estate_menu_accounting"
+              action="account.action_account_payments" sequence="2"/>
+
+    <menuitem id="estate_menu_config" name="Configuration" parent="estate_menu_root" sequence="90"
+              groups="primetech_estate_management.group_estate_manager"/>
+    <menuitem id="estate_menu_property_type" name="Types d’immeubles" parent="estate_menu_config"
+              action="estate_property_type_action"/>
+    <menuitem id="estate_menu_unit_type" name="Types de locaux" parent="estate_menu_config"
+              action="estate_unit_type_action"/>
+    <menuitem id="estate_menu_settings" name="Paramètres" parent="estate_menu_config"
+              action="base_setup.action_general_configuration"/>
+</odoo>

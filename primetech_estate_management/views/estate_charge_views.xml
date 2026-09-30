@@ -1,0 +1,31 @@
+<odoo>
+    <record id="estate_charge_action" model="ir.actions.act_window">
+        <field name="name">Charges</field><field name="res_model">estate.charge</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+    </record>
+    <record id="estate_charge_view_list" model="ir.ui.view">
+        <field name="name">estate.charge.list</field><field name="model">estate.charge</field>
+        <field name="arch" type="xml"><list>
+            <field name="date"/><field name="name"/><field name="charge_type"/>
+            <field name="property_id"/><field name="unit_id"/><field name="supplier_id" optional="show"/>
+            <field name="amount"/><field name="amount_residual" optional="show"/>
+            <field name="vendor_bill_id" optional="show"/><field name="state" widget="badge"/>
+        </list></field>
+    </record>
+    <record id="estate_charge_view_form" model="ir.ui.view">
+        <field name="name">estate.charge.form</field><field name="model">estate.charge</field>
+        <field name="arch" type="xml"><form>
+            <header>
+                <button name="action_confirm" type="object" string="Valider" class="btn-primary" invisible="state != 'draft'"/>
+                <button name="action_create_vendor_bill" type="object" string="Créer la facture fournisseur" class="btn-primary" invisible="state != 'confirmed'" groups="account.group_account_invoice"/>
+                <button name="action_open_vendor_bill" type="object" string="Ouvrir la facture" invisible="not vendor_bill_id" groups="account.group_account_invoice"/>
+                <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,billed,paid"/>
+            </header>
+            <sheet><group>
+                <group><field name="name"/><field name="charge_type"/><field name="recurrence"/><field name="date"/><field name="amount"/></group>
+                <group><field name="property_id"/><field name="unit_id"/><field name="lease_id"/><field name="schedule_id"/><field name="maintenance_request_id"/><field name="supplier_id"/></group>
+            </group><group string="Suivi comptable"><field name="vendor_bill_id" readonly="1"/><field name="amount_paid" readonly="1"/><field name="amount_residual" readonly="1"/></group>
+            <field name="note"/></sheet><chatter/>
+        </form></field>
+    </record>
+</odoo>

@@ -1,0 +1,251 @@
+<templates xml:space="preserve">
+    <t t-name="primetech_estate_management.EstateDashboard">
+        <div class="o_estate_dashboard container-fluid py-3" t-if="state.data" t-att-class="state.loading ? 'is-loading' : ''">
+            <section class="o_estate_dashboard_head mb-3">
+                <div>
+                    <h1><i class="fa fa-tachometer o_estate_label_icon"/> Tableau de bord immobilier</h1>
+                    <p class="text-muted mb-0">Pilotage du patrimoine, de la location et des encaissements</p>
+                    <span class="o_estate_period_summary"><i class="fa fa-calendar"/> <t t-esc="dateRangeLabel"/></span>
+                </div>
+
+                <div class="o_estate_filters" t-att-class="state.period === 'custom' ? 'has-custom-range' : ''" aria-label="Filtres globaux du tableau de bord">
+                    <div class="o_estate_period_picker">
+                        <button type="button" class="o_estate_period_trigger" t-att-class="state.periodOpen ? 'is-open' : ''" t-att-aria-expanded="state.periodOpen ? 'true' : 'false'" aria-haspopup="listbox" t-on-click.stop="togglePeriodMenu">
+                            <span t-esc="selectedPeriodLabel"/>
+                            <i class="fa fa-chevron-down o_estate_filter_chevron" aria-hidden="true"/>
+                        </button>
+                        <div t-if="state.periodOpen" class="o_estate_period_menu" role="listbox" aria-label="Sélectionner une période">
+                            <t t-foreach="periodOptions" t-as="option" t-key="option.value">
+                                <button type="button" class="o_estate_period_option" t-att-class="state.period === option.value ? 'is-active' : ''" t-att-aria-selected="state.period === option.value ? 'true' : 'false'" role="option" t-on-click="() => selectPeriod(option.value)">
+                                    <t t-esc="option.label"/>
+                                </button>
+                            </t>
+                        </div>
+                    </div>
+
+                    <div class="o_estate_period_picker">
+                        <button type="button" class="o_estate_period_trigger" t-att-class="state.propertyOpen ? 'is-open' : ''" t-att-aria-expanded="state.propertyOpen ? 'true' : 'false'" aria-haspopup="listbox" t-on-click.stop="togglePropertyMenu">
+                            <span><i class="fa fa-building o_estate_label_icon" aria-hidden="true"/><t t-esc="selectedPropertyLabel"/></span>
+                            <i class="fa fa-chevron-down o_estate_filter_chevron" aria-hidden="true"/>
+                        </button>
+                        <div t-if="state.propertyOpen" class="o_estate_period_menu" role="listbox" aria-label="Sélectionner un immeuble">
+                            <button type="button" class="o_estate_period_option" t-att-class="!state.propertyId ? 'is-active' : ''" t-att-aria-selected="!state.propertyId ? 'true' : 'false'" role="option" t-on-click="() => selectProperty(false)">Tous les immeubles</button>
+                            <t t-foreach="state.data.properties" t-as="property" t-key="property.id">
+                                <button type="button" class="o_estate_period_option" t-att-class="state.propertyId === property.id ? 'is-active' : ''" t-att-aria-selected="state.propertyId === property.id ? 'true' : 'false'" role="option" t-on-click="() => selectProperty(property.id)"><t t-esc="property.name"/></button>
+                            </t>
+                        </div>
+                    </div>
+
+                    <div class="o_estate_date_filters" t-if="state.period === 'custom'">
+                        <label><span>Du</span><input type="date" class="form-control" t-att-value="state.dateFrom || ''" t-on-change="(event) => onCustomDateChange('dateFrom', event)" aria-label="Date de début"/></label>
+                        <label><span>Au</span><input type="date" class="form-control" t-att-value="state.dateTo || ''" t-on-change="(event) => onCustomDateChange('dateTo', event)" aria-label="Date de fin"/></label>
+                    </div>
+
+                    <button type="button" class="o_estate_filter_reset" title="Réinitialiser les filtres" aria-label="Réinitialiser les filtres" t-on-click="resetFilters"><i class="fa fa-undo"/></button>
+                </div>
+            </section>
+
+            <div class="o_estate_content">
+                <t t-set="k" t-value="state.data.kpis"/>
+                <div class="row g-3 mb-4">
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <button type="button" class="o_estate_kpi o_estate_kpi--primary text-start w-100" title="Ouvrir le patrimoine immobilier" t-on-click="openProperties">
+                            <span class="o_estate_kpi_label"><i class="fa fa-building"/> Patrimoine</span>
+                            <strong><t t-esc="k.unit_count"/> locaux</strong>
+                            <small><t t-esc="k.property_count"/> propriétés</small><i class="fa fa-arrow-right o_estate_card_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <button type="button" class="o_estate_kpi o_estate_kpi--info text-start w-100" title="Voir les locaux disponibles" t-on-click="() => openUnits('available')">
+                            <span class="o_estate_kpi_label"><i class="fa fa-home"/> Locaux libres</span>
+                            <strong><t t-esc="k.available"/></strong>
+                            <small>À proposer à la location</small><i class="fa fa-arrow-right o_estate_card_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <button type="button" class="o_estate_kpi o_estate_kpi--warning text-start w-100" title="Voir les factures non réglées" t-on-click="() => openUnpaidInvoices()">
+                            <span class="o_estate_kpi_label"><i class="fa fa-file-text-o"/> Factures non réglées</span>
+                            <strong><t t-esc="k.invoice_unpaid_count"/></strong>
+                            <small><t t-esc="money(k.invoice_unpaid_amount)"/> <t t-esc="state.data.currency"/></small><i class="fa fa-arrow-right o_estate_card_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <button type="button" class="o_estate_kpi o_estate_kpi--primary text-start w-100" title="Voir le chiffre d'affaires facturé" t-on-click="() => openFinanceMetric('invoiced')">
+                            <span class="o_estate_kpi_label"><i class="fa fa-bar-chart"/> Chiffre d'affaires</span>
+                            <strong><t t-esc="money(k.revenue)"/> <t t-esc="state.data.currency"/></strong>
+                            <small>Factures comptabilisées</small><i class="fa fa-arrow-right o_estate_card_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <button type="button" class="o_estate_kpi o_estate_kpi--danger text-start w-100" title="Voir les créances locataires" t-on-click="openReceivables">
+                            <span class="o_estate_kpi_label"><i class="fa fa-balance-scale"/> Créances locataires</span>
+                            <strong><t t-esc="money(k.receivable)"/> <t t-esc="state.data.currency"/></strong>
+                            <small>À recouvrer sur la période</small><i class="fa fa-arrow-right o_estate_card_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <button type="button" class="o_estate_kpi o_estate_kpi--danger text-start w-100" title="Voir les factures de loyers en retard" t-on-click="openLateSchedules">
+                            <span class="o_estate_kpi_label"><i class="fa fa-exclamation-circle"/> Factures en retard</span>
+                            <strong><t t-esc="money(k.late_amount)"/> <t t-esc="state.data.currency"/></strong>
+                            <small><t t-esc="k.late_count"/> factures à relancer</small><i class="fa fa-arrow-right o_estate_card_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-4 col-xl-3">
+                        <button type="button" class="o_estate_kpi o_estate_kpi--primary text-start w-100" title="Voir les encaissements de la période" t-on-click="() => openFinanceMetric('collected')">
+                            <span class="o_estate_kpi_label"><i class="fa fa-line-chart"/> Encaissements</span>
+                            <strong><t t-esc="money(k.collected)"/> <t t-esc="state.data.currency"/></strong>
+                            <small>Taux : <t t-esc="k.recovery_rate.toFixed(1)"/> %</small><i class="fa fa-arrow-right o_estate_card_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-xl-7">
+                        <section class="o_estate_panel o_estate_finance_panel">
+                            <t t-set="timeline" t-value="state.data.charts.finance"/>
+                            <div class="o_estate_finance_heading">
+                                <div>
+                                    <h3 class="o_estate_panel_title"><i class="fa fa-line-chart o_estate_label_icon"/> Finance</h3>
+                                    <p>Analyse par <strong><t t-esc="timeline.granularity_label"/></strong> : prévision, facturation et encaissement.</p>
+                                </div>
+                                <span class="o_estate_finance_period"><i class="fa fa-calendar-o"/> <t t-esc="dateRangeLabel"/></span>
+                            </div>
+
+                            <div class="o_estate_finance_chart_title">
+                                <h4><i class="fa fa-area-chart o_estate_label_icon"/> Évolution financière</h4>
+                                <div class="o_estate_finance_series" aria-label="Séries affichées dans le graphique">
+                                    <label class="o_estate_finance_series_toggle o_estate_finance_series_toggle--expected" t-att-class="state.financeSeries.expected ? 'is-selected' : ''" t-att-title="money(k.expected) + ' ' + state.data.currency"><input type="checkbox" t-att-checked="state.financeSeries.expected" t-on-change="() => toggleFinanceSeries('expected')"/><i/>Prévision</label>
+                                    <label class="o_estate_finance_series_toggle o_estate_finance_series_toggle--invoiced" t-att-class="state.financeSeries.invoiced ? 'is-selected' : ''" t-att-title="money(k.invoiced) + ' ' + state.data.currency"><input type="checkbox" t-att-checked="state.financeSeries.invoiced" t-on-change="() => toggleFinanceSeries('invoiced')"/><i/>Facturé</label>
+                                    <label class="o_estate_finance_series_toggle o_estate_finance_series_toggle--collected" t-att-class="state.financeSeries.collected ? 'is-selected' : ''" t-att-title="money(k.collected) + ' ' + state.data.currency"><input type="checkbox" t-att-checked="state.financeSeries.collected" t-on-change="() => toggleFinanceSeries('collected')"/><i/>Encaissé</label>
+                                    <label class="o_estate_finance_series_toggle o_estate_finance_series_toggle--outstanding" t-att-class="state.financeSeries.outstanding ? 'is-selected' : ''" t-att-title="money(k.outstanding) + ' ' + state.data.currency"><input type="checkbox" t-att-checked="state.financeSeries.outstanding" t-on-change="() => toggleFinanceSeries('outstanding')"/><i/>À encaisser</label>
+                                </div>
+                            </div>
+                            <p class="o_estate_finance_chart_note">Cochez une analyse pour l'afficher. Cliquez une bande pour ouvrir son détail.</p>
+                            <div class="o_estate_finance_chart">
+                                <div class="o_estate_finance_chart_scroll">
+                                    <div class="o_estate_finance_chart_canvas" t-att-style="'--estate-finance-items:' + timeline.items.length">
+                                        <span class="o_estate_finance_chart_grid" aria-hidden="true"/>
+                                        <div class="o_estate_finance_buckets">
+                                            <div t-foreach="timeline.items" t-as="item" t-key="item.label" class="o_estate_finance_bucket">
+                                                <div class="o_estate_finance_bucket_bars">
+                                                    <button t-if="state.financeSeries.expected" type="button" class="o_estate_finance_bar o_estate_finance_bar--expected" t-att-title="financeBucketTitle(item, 'expected')" t-att-style="'--estate-finance-bar-height:' + financeBarHeight(item, 'expected') + '%; --estate-bar-delay:' + item_index * 55 + 'ms'" t-on-click="() => openFinanceBucket(item, 'expected')"/>
+                                                    <button t-if="state.financeSeries.invoiced" type="button" class="o_estate_finance_bar o_estate_finance_bar--invoiced" t-att-title="financeBucketTitle(item, 'invoiced')" t-att-style="'--estate-finance-bar-height:' + financeBarHeight(item, 'invoiced') + '%; --estate-bar-delay:' + item_index * 55 + 'ms'" t-on-click="() => openFinanceBucket(item, 'invoiced')"/>
+                                                    <button t-if="state.financeSeries.collected" type="button" class="o_estate_finance_bar o_estate_finance_bar--collected" t-att-title="financeBucketTitle(item, 'collected')" t-att-style="'--estate-finance-bar-height:' + financeBarHeight(item, 'collected') + '%; --estate-bar-delay:' + (item_index * 55 + 80) + 'ms'" t-on-click="() => openFinanceBucket(item, 'collected')"/>
+                                                    <button t-if="state.financeSeries.outstanding" type="button" class="o_estate_finance_bar o_estate_finance_bar--outstanding" t-att-title="financeBucketTitle(item, 'outstanding')" t-att-style="'--estate-finance-bar-height:' + financeBarHeight(item, 'outstanding') + '%; --estate-bar-delay:' + (item_index * 55 + 120) + 'ms'" t-on-click="() => openFinanceBucket(item, 'outstanding')"/>
+                                                </div>
+                                                <span class="o_estate_finance_bucket_label"><t t-esc="item.label"/></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-xl-5">
+                        <section class="o_estate_panel">
+                            <h3 class="o_estate_panel_title"><i class="fa fa-building-o o_estate_label_icon"/> Occupation du patrimoine</h3>
+                            <t t-foreach="state.data.charts.occupancy" t-as="item" t-key="item.state">
+                                <button type="button" class="o_estate_metric" t-on-click="() => openUnits(item.state)"><span><i class="fa fa-home o_estate_label_icon"/> <t t-esc="item.label"/></span><strong><t t-esc="item.value"/></strong></button>
+                            </t>
+                            <h4><i class="fa fa-compass o_estate_label_icon"/> Décisions à suivre</h4>
+                            <button type="button" class="o_estate_metric" t-on-click="() => openUnits('maintenance')"><span><i class="fa fa-wrench o_estate_label_icon"/> Locaux en maintenance</span><strong><t t-esc="k.maintenance"/></strong></button>
+                            <button type="button" class="o_estate_metric" t-on-click="() => openUnits('available')"><span><i class="fa fa-unlock-alt o_estate_label_icon"/> Locaux libres</span><strong><t t-esc="k.available"/></strong></button>
+                        </section>
+                    </div>
+
+                    <div class="col-12">
+                        <section class="o_estate_panel">
+                            <h3 class="o_estate_panel_title"><i class="fa fa-pie-chart o_estate_label_icon"/> Analyse du chiffre d'affaires et du rendement</h3>
+                            <p class="text-muted small mb-3">Factures comptabilisées sur la période sélectionnée. Le rendement correspond à la part déjà recouvrée sur ce chiffre d'affaires.</p>
+                            <t t-set="revenue" t-value="state.data.revenue"/>
+                            <div class="row g-3">
+                                <div class="col-xl-4">
+                                    <h4><i class="fa fa-building-o o_estate_label_icon"/> Par immeuble</h4>
+                                    <div class="o_estate_data_scroll"><table class="table table-sm mb-0"><thead><tr><th>Immeuble</th><th>Fact.</th><th class="text-end">CA</th><th class="text-end">Solde</th><th class="text-end">Rend.</th></tr></thead><tbody><tr t-foreach="revenue.properties" t-as="item" t-key="item.id" class="o_estate_clickable_row" t-on-click="() => openPropertyRevenue(item.id)"><td><t t-esc="item.name"/></td><td><t t-esc="item.count"/></td><td class="text-end"><t t-esc="money(item.invoiced)"/></td><td class="text-end"><t t-esc="money(item.residual)"/></td><td class="text-end"><t t-esc="item.recovery_rate.toFixed(1)"/> %</td></tr><tr t-if="!revenue.properties.length"><td colspan="5" class="text-muted">Aucune facture comptabilisée.</td></tr></tbody></table></div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <h4><i class="fa fa-home o_estate_label_icon"/> Par local</h4>
+                                    <div class="o_estate_data_scroll"><table class="table table-sm mb-0"><thead><tr><th>Local</th><th>Fact.</th><th class="text-end">CA</th><th class="text-end">Solde</th><th class="text-end">Rend.</th></tr></thead><tbody><tr t-foreach="revenue.units" t-as="item" t-key="item.id" class="o_estate_clickable_row" t-on-click="() => openUnitRevenue(item.id)"><td><t t-esc="item.name"/></td><td><t t-esc="item.count"/></td><td class="text-end"><t t-esc="money(item.invoiced)"/></td><td class="text-end"><t t-esc="money(item.residual)"/></td><td class="text-end"><t t-esc="item.recovery_rate.toFixed(1)"/> %</td></tr><tr t-if="!revenue.units.length"><td colspan="5" class="text-muted">Aucune facture comptabilisée.</td></tr></tbody></table></div>
+                                </div>
+                                <div class="col-xl-4">
+                                    <h4><i class="fa fa-user-o o_estate_label_icon"/> Par locataire</h4>
+                                    <div class="o_estate_data_scroll"><table class="table table-sm mb-0"><thead><tr><th>Locataire</th><th>Fact.</th><th class="text-end">CA</th><th class="text-end">Solde</th><th class="text-end">Rend.</th></tr></thead><tbody><tr t-foreach="revenue.tenants" t-as="item" t-key="item.id" class="o_estate_clickable_row" t-on-click="() => openTenantRevenue(item.id)"><td><t t-esc="item.name"/></td><td><t t-esc="item.count"/></td><td class="text-end"><t t-esc="money(item.invoiced)"/></td><td class="text-end"><t t-esc="money(item.residual)"/></td><td class="text-end"><t t-esc="item.recovery_rate.toFixed(1)"/> %</td></tr><tr t-if="!revenue.tenants.length"><td colspan="5" class="text-muted">Aucune facture comptabilisée.</td></tr></tbody></table></div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="button" class="o_estate_debtor_kpi text-start w-100" title="Ouvrir les locataires débiteurs" t-on-click="openDebtors">
+                            <span class="o_estate_debtor_heading"><i class="fa fa-users" aria-hidden="true"/> Locataires débiteurs</span>
+                            <span class="o_estate_debtor_main"><strong><t t-esc="k.debtor_count"/></strong><small>locataires avec une facture de loyer ouverte</small></span>
+                            <span class="o_estate_debtor_details">
+                                <span><small>Créance totale</small><strong><t t-esc="money(k.receivable)"/> <t t-esc="state.data.currency"/></strong></span>
+                                <span><small>Factures impayées</small><strong><t t-esc="k.invoice_unpaid_count"/></strong></span>
+                                <span><small>Dette moyenne</small><strong><t t-esc="money(k.debtor_count ? k.receivable / k.debtor_count : 0)"/> <t t-esc="state.data.currency"/></strong></span>
+                                <span><small>En retard</small><strong><t t-esc="money(k.late_amount)"/> <t t-esc="state.data.currency"/></strong></span>
+                            </span>
+                            <i class="fa fa-arrow-right o_estate_debtor_arrow" aria-hidden="true"/>
+                        </button>
+                    </div>
+
+                    <div class="col-xl-6">
+                        <section class="o_estate_panel">
+                            <h3 class="o_estate_panel_title"><i class="fa fa-balance-scale o_estate_label_icon"/> Créances par locataire</h3>
+                            <div class="o_estate_data_scroll">
+                                <table class="table table-sm mb-0">
+                                    <thead><tr><th><i class="fa fa-user-o o_estate_label_icon"/> Locataire</th><th><i class="fa fa-file-text-o o_estate_label_icon"/> Factures</th><th class="text-end"><i class="fa fa-money o_estate_label_icon"/> Créance</th></tr></thead>
+                                    <tbody>
+                                        <tr t-foreach="state.data.alerts.tenant_debts" t-as="tenant" t-key="tenant.id" class="o_estate_clickable_row" t-on-click="() => openTenantReceivables(tenant.id)">
+                                            <td><t t-esc="tenant.name"/></td><td><t t-esc="tenant.count"/></td><td class="text-end"><t t-esc="money(tenant.amount)"/></td>
+                                        </tr>
+                                        <tr t-if="!state.data.alerts.tenant_debts.length"><td colspan="3" class="text-muted">Aucune créance sur cette période.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-xl-6">
+                        <section class="o_estate_panel">
+                            <h3 class="o_estate_panel_title"><i class="fa fa-exclamation-triangle o_estate_label_icon"/> Factures impayées</h3>
+                            <div class="o_estate_data_scroll">
+                                <table class="table table-sm mb-0">
+                                    <thead><tr><th><i class="fa fa-user-o o_estate_label_icon"/> Locataire</th><th><i class="fa fa-home o_estate_label_icon"/> Local</th><th><i class="fa fa-clock-o o_estate_label_icon"/> Retard</th><th class="text-end"><i class="fa fa-money o_estate_label_icon"/> Montant</th></tr></thead>
+                                    <tbody>
+                                        <tr t-foreach="state.data.alerts.unpaid" t-as="line" t-key="line.id" class="o_estate_clickable_row" t-on-click="() => openInvoice(line.id)">
+                                            <td><t t-esc="line.tenant"/></td><td><t t-esc="line.unit"/></td><td><t t-esc="line.late_days"/> j</td><td class="text-end"><t t-esc="money(line.amount)"/></td>
+                                        </tr>
+                                        <tr t-if="!state.data.alerts.unpaid.length"><td colspan="4" class="text-muted">Aucune facture impayée sur cette période.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-xl-6">
+                        <section class="o_estate_panel">
+                            <h3 class="o_estate_panel_title"><i class="fa fa-calendar-times-o o_estate_label_icon"/> Baux arrivant à échéance</h3>
+                            <div class="o_estate_scroll_list">
+                                <button type="button" t-foreach="state.data.alerts.expiring" t-as="lease" t-key="lease.id" class="o_estate_alert" t-on-click="() => openLease(lease.id)">
+                                    <strong><i class="fa fa-file-text-o o_estate_label_icon"/> <t t-esc="lease.name"/></strong><span><t t-esc="lease.tenant"/> · <t t-esc="lease.days"/> jours</span>
+                                </button>
+                                <p t-if="!state.data.alerts.expiring.length" class="o_estate_empty">Aucun bail n’arrive à échéance sur cette période.</p>
+                            </div>
+                        </section>
+                    </div>
+                    <div class="col-xl-6">
+                        <section class="o_estate_panel">
+                            <h3 class="o_estate_panel_title"><i class="fa fa-unlock-alt o_estate_label_icon"/> Locaux disponibles</h3>
+                            <div class="o_estate_scroll_list">
+                                <button type="button" t-foreach="state.data.alerts.available" t-as="unit" t-key="unit.id" class="o_estate_alert" t-on-click="() => openUnit(unit.id)">
+                                    <strong><i class="fa fa-home o_estate_label_icon"/> <t t-esc="unit.name"/></strong><span><t t-esc="unit.property"/> · <t t-esc="unit.type"/></span>
+                                </button>
+                                <p t-if="!state.data.alerts.available.length" class="o_estate_empty">Aucun local disponible.</p>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div t-else="" class="o_estate_dashboard_loading">Chargement du tableau de bord…</div>
+    </t>
+</templates>

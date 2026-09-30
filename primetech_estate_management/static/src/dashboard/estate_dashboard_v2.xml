@@ -1,0 +1,112 @@
+<templates xml:space="preserve">
+    <t t-name="primetech_estate_management.EstateDashboard">
+        <div class="o_estate_dashboard o_estate_dashboard_v2 container-fluid" t-if="state.data" t-att-class="state.loading ? 'is-loading' : ''">
+            <t t-set="k" t-value="state.data.kpis"/>
+            <t t-set="timeline" t-value="state.data.charts.finance"/>
+            <t t-set="analysis" t-value="state.data.analysis"/>
+
+            <header class="o_estate_v2_head">
+                <div class="o_estate_v2_title">
+                    <span class="o_estate_v2_home"><i class="fa fa-home"/></span>
+                    <div>
+                        <h1>Tableau de bord immobilier</h1>
+                        <p>Vue d'ensemble de votre patrimoine, de l'occupation, des revenus, des charges et des opérations</p>
+                    </div>
+                </div>
+                <span class="o_estate_v2_scope"><i class="fa fa-calendar"/> <t t-esc="dateRangeLabel"/></span>
+            </header>
+
+            <section class="o_estate_v2_filters" aria-label="Filtres globaux du tableau de bord">
+                <div class="o_estate_v2_filter_controls" t-att-class="state.period === 'custom' ? 'is-custom' : ''">
+                <div class="o_estate_v2_filter o_estate_period_picker">
+                    <span class="o_estate_v2_filter_label">Période</span>
+                    <button type="button" class="o_estate_period_trigger" t-att-class="state.periodOpen ? 'is-open' : ''" t-on-click.stop="togglePeriodMenu">
+                        <i class="fa fa-calendar"/><span t-esc="selectedPeriodLabel"/><i class="fa fa-chevron-down o_estate_filter_chevron"/>
+                    </button>
+                    <div t-if="state.periodOpen" class="o_estate_period_menu" role="listbox">
+                        <t t-foreach="periodOptions" t-as="option" t-key="option.value">
+                            <button type="button" class="o_estate_period_option" t-att-class="state.period === option.value ? 'is-active' : ''" t-on-click="() => selectPeriod(option.value)"><t t-esc="option.label"/></button>
+                        </t>
+                    </div>
+                </div>
+
+                <div class="o_estate_v2_filter o_estate_v2_date_filter" t-if="state.period === 'custom'">
+                    <label><span>Du</span><input type="date" class="form-control" t-att-value="state.dateFrom || ''" t-on-change="(event) => onCustomDateChange('dateFrom', event)"/></label>
+                </div>
+                <div class="o_estate_v2_filter o_estate_v2_date_filter" t-if="state.period === 'custom'">
+                    <label><span>Au</span><input type="date" class="form-control" t-att-value="state.dateTo || ''" t-on-change="(event) => onCustomDateChange('dateTo', event)"/></label>
+                </div>
+
+                <div class="o_estate_v2_filter o_estate_period_picker">
+                    <span class="o_estate_v2_filter_label">Immeuble</span>
+                    <button type="button" class="o_estate_period_trigger" t-att-class="state.propertyOpen ? 'is-open' : ''" t-on-click.stop="togglePropertyMenu"><span t-esc="selectedPropertyLabel"/><i class="fa fa-chevron-down o_estate_filter_chevron"/></button>
+                    <div t-if="state.propertyOpen" class="o_estate_period_menu" role="listbox">
+                        <button type="button" class="o_estate_period_option" t-att-class="!state.propertyId ? 'is-active' : ''" t-on-click="() => selectProperty(false)">Tous les immeubles</button>
+                        <t t-foreach="state.data.properties" t-as="property" t-key="property.id"><button type="button" class="o_estate_period_option" t-att-class="state.propertyId === property.id ? 'is-active' : ''" t-on-click="() => selectProperty(property.id)"><t t-esc="property.name"/></button></t>
+                    </div>
+                </div>
+
+                <div class="o_estate_v2_filter o_estate_period_picker">
+                    <span class="o_estate_v2_filter_label">Type de bien</span>
+                    <button type="button" class="o_estate_period_trigger" t-att-class="state.propertyTypeOpen ? 'is-open' : ''" t-on-click.stop="togglePropertyTypeMenu"><span t-esc="selectedPropertyTypeLabel"/><i class="fa fa-chevron-down o_estate_filter_chevron"/></button>
+                    <div t-if="state.propertyTypeOpen" class="o_estate_period_menu" role="listbox">
+                        <button type="button" class="o_estate_period_option" t-att-class="!state.propertyTypeId ? 'is-active' : ''" t-on-click="() => selectPropertyType(false)">Tous les types</button>
+                        <t t-foreach="state.data.property_types" t-as="type" t-key="type.id"><button type="button" class="o_estate_period_option" t-att-class="state.propertyTypeId === type.id ? 'is-active' : ''" t-on-click="() => selectPropertyType(type.id)"><t t-esc="type.name"/></button></t>
+                    </div>
+                </div>
+
+                <div class="o_estate_v2_filter o_estate_period_picker">
+                    <span class="o_estate_v2_filter_label">Gestionnaire</span>
+                    <button type="button" class="o_estate_period_trigger" t-att-class="state.managerOpen ? 'is-open' : ''" t-on-click.stop="toggleManagerMenu"><span t-esc="selectedManagerLabel"/><i class="fa fa-chevron-down o_estate_filter_chevron"/></button>
+                    <div t-if="state.managerOpen" class="o_estate_period_menu" role="listbox">
+                        <button type="button" class="o_estate_period_option" t-att-class="!state.managerId ? 'is-active' : ''" t-on-click="() => selectManager(false)">Tous les gestionnaires</button>
+                        <t t-foreach="state.data.managers" t-as="manager" t-key="manager.id"><button type="button" class="o_estate_period_option" t-att-class="state.managerId === manager.id ? 'is-active' : ''" t-on-click="() => selectManager(manager.id)"><t t-esc="manager.name"/></button></t>
+                    </div>
+                </div>
+                </div>
+            </section>
+
+            <main class="o_estate_v2_content">
+                <section class="o_estate_v2_kpis">
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--blue" t-on-click="openProperties"><span class="o_estate_v2_kpi_icon"><i class="fa fa-building"/></span><span><small>Immeubles</small><strong><t t-esc="k.property_count"/></strong><em t-esc="dashboardScopeLabel"/></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--violet" t-on-click="() => openUnits()"><span class="o_estate_v2_kpi_icon"><i class="fa fa-building-o"/></span><span><small>Locaux</small><strong><t t-esc="k.unit_count"/></strong><em t-esc="dashboardScopeLabel"/></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--green" t-on-click="() => openUnits('occupied')"><span class="o_estate_v2_kpi_icon"><i class="fa fa-users"/></span><span><small>Occupées</small><strong><t t-esc="k.occupied"/></strong><em><t t-esc="k.occupancy_rate.toFixed(1)"/> % d'occupation</em></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--orange" t-on-click="() => openUnits('available')"><span class="o_estate_v2_kpi_icon"><i class="fa fa-key"/></span><span><small>Disponibles</small><strong><t t-esc="k.available"/></strong><em>à proposer à la location</em></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--red" t-on-click="() => openUnpaidInvoices()"><span class="o_estate_v2_kpi_icon"><i class="fa fa-exclamation-triangle"/></span><span><small>Impayés</small><strong><t t-esc="money(k.receivable)"/> <t t-esc="state.data.currency"/></strong><em><t t-esc="k.invoice_unpaid_count"/> factures ouvertes</em></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--green" t-on-click="() => openFinanceMetric('expected')"><span class="o_estate_v2_kpi_icon"><i class="fa fa-money"/></span><span><small>Loyers attendus</small><strong><t t-esc="money(k.expected)"/> <t t-esc="state.data.currency"/></strong><em><t t-esc="dateRangeLabel"/></em></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--blue" t-on-click="() => openFinanceMetric('collected')"><span class="o_estate_v2_kpi_icon"><i class="fa fa-credit-card"/></span><span><small>Loyers encaissés</small><strong><t t-esc="money(k.collected)"/> <t t-esc="state.data.currency"/></strong><em>recouvrement <t t-esc="k.recovery_rate.toFixed(1)"/> %</em></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--violet" t-on-click="openDeposits"><span class="o_estate_v2_kpi_icon"><i class="fa fa-shield"/></span><span><small>Cautions</small><strong><t t-esc="money(k.deposit_required)"/> <t t-esc="state.data.currency"/></strong><em><t t-esc="money(k.deposit_balance)"/> à verser</em></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--cyan" t-on-click="() => openCharges()"><span class="o_estate_v2_kpi_icon"><i class="fa fa-list-alt"/></span><span><small>Charges</small><strong><t t-esc="money(k.charge_total)"/> <t t-esc="state.data.currency"/></strong><em><t t-esc="dateRangeLabel"/></em></span></button>
+                    <button type="button" class="o_estate_v2_kpi o_estate_v2_kpi--red" t-on-click="() => openMaintenance()"><span class="o_estate_v2_kpi_icon"><i class="fa fa-wrench"/></span><span><small>Maintenances</small><strong><t t-esc="k.maintenance_open_count"/></strong><em><t t-esc="k.maintenance_urgent_count"/> urgentes</em></span></button>
+                </section>
+
+                <section class="o_estate_v2_grid o_estate_v2_grid--analytics">
+                    <article class="o_estate_v2_panel o_estate_v2_finance_panel">
+                        <div class="o_estate_v2_panel_head"><h2><i class="fa fa-line-chart"/> Évolution financière</h2><div class="o_estate_v2_series"><label t-att-class="state.financeSeries.expected ? 'is-active' : ''"><input type="checkbox" t-att-checked="state.financeSeries.expected" t-on-change="() => toggleFinanceSeries('expected')"/><i/>Loyers attendus</label><label t-att-class="state.financeSeries.collected ? 'is-active' : ''"><input type="checkbox" t-att-checked="state.financeSeries.collected" t-on-change="() => toggleFinanceSeries('collected')"/><i/>Loyers encaissés</label><label t-att-class="state.financeSeries.charges ? 'is-active' : ''"><input type="checkbox" t-att-checked="state.financeSeries.charges" t-on-change="() => toggleFinanceSeries('charges')"/><i/>Charges</label></div></div>
+                        <p class="o_estate_v2_panel_note">Analyse par <t t-esc="timeline.granularity_label"/> — <t t-esc="dateRangeLabel"/></p>
+                        <div class="o_estate_v2_chart_canvas" t-att-style="'--estate-finance-items:' + timeline.items.length"><span class="o_estate_v2_chart_grid"/><div class="o_estate_v2_chart_buckets"><div t-foreach="timeline.items" t-as="item" t-key="item.label" class="o_estate_v2_chart_bucket"><div class="o_estate_v2_chart_bars"><button t-if="state.financeSeries.expected" type="button" class="o_estate_v2_bar o_estate_v2_bar--expected" t-att-title="financeBucketTitle(item, 'expected')" t-att-style="'--estate-bar-height:' + financeBarHeight(item, 'expected') + '%'" t-on-click="() => openFinanceBucket(item, 'expected')"/><button t-if="state.financeSeries.collected" type="button" class="o_estate_v2_bar o_estate_v2_bar--collected" t-att-title="financeBucketTitle(item, 'collected')" t-att-style="'--estate-bar-height:' + financeBarHeight(item, 'collected') + '%'" t-on-click="() => openFinanceBucket(item, 'collected')"/><button t-if="state.financeSeries.charges" type="button" class="o_estate_v2_bar o_estate_v2_bar--charges" t-att-title="financeBucketTitle(item, 'charges')" t-att-style="'--estate-bar-height:' + financeBarHeight(item, 'charges') + '%'" t-on-click="() => openFinanceBucket(item, 'charges')"/></div><span><t t-esc="item.label"/></span></div></div></div>
+                    </article>
+
+                    <article class="o_estate_v2_panel o_estate_v2_donut_panel"><h2>Répartition des revenus</h2><button type="button" class="o_estate_v2_donut" t-att-style="donutStyle(analysis.revenue_segments)" t-on-click="() => openRevenueSegment('rent')"><span><strong><t t-esc="money(sumValues(analysis.revenue_segments))"/></strong><small><t t-esc="state.data.currency"/></small></span></button><div class="o_estate_v2_legend"><button type="button" t-foreach="analysis.revenue_segments" t-as="item" t-key="item.key" t-on-click="() => openRevenueSegment(item.key)"><i t-att-class="'is-' + item.key"/><span><t t-esc="item.label"/></span><strong><t t-esc="money(item.value)"/> <t t-esc="state.data.currency"/></strong></button></div></article>
+                    <article class="o_estate_v2_panel o_estate_v2_donut_panel"><h2>État des locaux</h2><button type="button" class="o_estate_v2_donut" t-att-style="donutStyle(analysis.unit_segments)" t-on-click="() => openUnits()"><span><strong><t t-esc="k.unit_count"/></strong><small>Locaux</small></span></button><div class="o_estate_v2_legend"><button type="button" t-foreach="analysis.unit_segments" t-as="item" t-key="item.key" t-on-click="() => openUnits(item.key)"><i t-att-class="'is-' + item.key"/><span><t t-esc="item.label"/></span><strong><t t-esc="item.value"/> (<t t-esc="item.percentage.toFixed(1)"/> %)</strong></button></div></article>
+                    <article class="o_estate_v2_panel"><h2>Taux d'occupation par immeuble</h2><div class="o_estate_v2_progress_list"><button type="button" t-foreach="analysis.property_occupancy" t-as="item" t-key="item.id" t-on-click="() => openPropertyOccupancy(item.id)"><span><t t-esc="item.name"/></span><div><i t-att-style="progressStyle(item.percentage)"/></div><strong><t t-esc="item.percentage.toFixed(0)"/> %</strong></button><p t-if="!analysis.property_occupancy.length">Aucun immeuble ne correspond aux filtres.</p></div></article>
+                </section>
+
+                <section class="o_estate_v2_grid o_estate_v2_grid--operations">
+                    <article class="o_estate_v2_panel"><h2><i class="fa fa-exclamation-circle"/> Détail des impayés par tranche</h2><div class="o_estate_v2_aging"><button type="button" t-foreach="analysis.aging" t-as="item" t-key="item.key" t-att-style="ratioStyle(item.value, k.receivable)" t-on-click="() => openAging(item.key)"><strong><t t-esc="money(item.value)"/></strong><i/><span><t t-esc="item.label"/></span><small><t t-esc="item.count"/> factures</small></button></div></article>
+                    <article class="o_estate_v2_panel o_estate_v2_donut_panel"><h2><i class="fa fa-shield"/> Cautions</h2><button type="button" class="o_estate_v2_donut" t-att-style="donutStyle(analysis.deposits)" t-on-click="openDeposits"><span><strong><t t-esc="money(k.deposit_required)"/></strong><small><t t-esc="state.data.currency"/></small></span></button><div class="o_estate_v2_legend"><button type="button" t-foreach="analysis.deposits" t-as="item" t-key="item.key" t-on-click="openDeposits"><i t-att-class="'is-' + item.key"/><span><t t-esc="item.label"/></span><strong><t t-esc="money(item.value)"/></strong></button></div></article>
+                    <article class="o_estate_v2_panel"><h2><i class="fa fa-list-alt"/> Charges de la période</h2><div class="o_estate_v2_charge_list"><button type="button" t-foreach="analysis.charges" t-as="item" t-key="item.key" t-on-click="() => openChargeType(item.key)"><span><t t-esc="item.label"/></span><div><i t-att-style="ratioStyle(item.value, k.charge_total)"/></div><strong><t t-esc="money(item.value)"/> <t t-esc="state.data.currency"/></strong></button><p t-if="!analysis.charges.length">Aucune charge confirmée sur la période.</p></div></article>
+                    <article class="o_estate_v2_panel o_estate_v2_donut_panel"><h2><i class="fa fa-wrench"/> Maintenances</h2><button type="button" class="o_estate_v2_donut" t-att-style="donutStyle(analysis.maintenance)" t-on-click="() => openMaintenance()"><span><strong><t t-esc="analysis.maintenance_total"/></strong><small>En cours</small></span></button><div class="o_estate_v2_legend"><button type="button" t-foreach="analysis.maintenance" t-as="item" t-key="item.key" t-on-click="() => openMaintenanceStatus(item.key)"><i t-att-class="'is-' + item.key"/><span><t t-esc="item.label"/></span><strong><t t-esc="item.value"/> (<t t-esc="item.percentage.toFixed(0)"/> %)</strong></button></div></article>
+                </section>
+
+                <section class="o_estate_v2_grid o_estate_v2_grid--bottom">
+                    <article class="o_estate_v2_panel"><div class="o_estate_v2_panel_head"><h2><i class="fa fa-bell"/> Alertes &amp; échéances</h2><button type="button" t-on-click="openLateSchedules">Voir tout <i class="fa fa-arrow-right"/></button></div><div class="o_estate_v2_alerts"><button type="button" t-on-click="openLateSchedules"><b class="is-red"><t t-esc="k.late_count"/></b><span><t t-esc="k.late_count"/> factures de loyers en retard</span></button><button type="button" t-on-click="() => openLeaseStatus('active')"><b class="is-orange"><t t-esc="k.expiring_lease_count"/></b><span><t t-esc="k.expiring_lease_count"/> contrats arrivent à échéance</span></button><button type="button" t-on-click="openDeposits"><b class="is-violet"><t t-esc="analysis.deposits[1] ? analysis.deposits[1].value ? 1 : 0 : 0"/></b><span>Cautions restant à verser</span></button><button type="button" t-on-click="() => openMaintenance()"><b class="is-blue"><t t-esc="k.maintenance_open_count"/></b><span>Locaux ou demandes en maintenance</span></button></div></article>
+                    <article class="o_estate_v2_panel"><div class="o_estate_v2_panel_head"><h2><i class="fa fa-credit-card"/> Derniers loyers encaissés</h2><button type="button" t-on-click="() => openFinanceMetric('collected')">Voir tout <i class="fa fa-arrow-right"/></button></div><div class="o_estate_v2_table_wrap"><table><thead><tr><th>Date</th><th>Locataire</th><th>Montant</th><th>Immeuble / Local</th></tr></thead><tbody><tr t-foreach="analysis.recent_collections" t-as="line" t-key="line.invoice_id" t-on-click="() => openInvoice(line.invoice_id)"><td><t t-esc="line.date"/></td><td><t t-esc="line.tenant"/></td><td><strong><t t-esc="money(line.amount)"/></strong></td><td><t t-esc="line.unit"/></td></tr><tr t-if="!analysis.recent_collections.length"><td colspan="4">Aucun encaissement sur la période.</td></tr></tbody></table></div></article>
+                    <article class="o_estate_v2_panel"><div class="o_estate_v2_panel_head"><h2><i class="fa fa-file"/> Contrats de bail</h2><button type="button" t-on-click="() => openLeaseStatus('active')">Voir tout <i class="fa fa-arrow-right"/></button></div><div class="o_estate_v2_status_list"><button type="button" t-foreach="analysis.lease_statuses" t-as="item" t-key="item.key" t-on-click="() => openLeaseStatus(item.key)"><span><t t-esc="item.label"/></span><strong><t t-esc="item.value"/></strong><i t-att-style="ratioStyle(item.value, analysis.active_lease_count)"/></button></div></article>
+                    <article class="o_estate_v2_panel"><div class="o_estate_v2_panel_head"><h2><i class="fa fa-key"/> Locaux disponibles</h2><button type="button" t-on-click="() => openUnits('available')">Voir tout <i class="fa fa-arrow-right"/></button></div><div class="o_estate_v2_table_wrap"><table><thead><tr><th>Local</th><th>Type</th><th>Immeuble</th><th>État</th></tr></thead><tbody><tr t-foreach="state.data.alerts.available" t-as="unit" t-key="unit.id" t-on-click="() => openUnit(unit.id)"><td><t t-esc="unit.name"/></td><td><t t-esc="unit.type"/></td><td><t t-esc="unit.property"/></td><td><span class="o_estate_v2_badge">Disponible</span></td></tr><tr t-if="!state.data.alerts.available.length"><td colspan="4">Aucun local disponible.</td></tr></tbody></table></div></article>
+                </section>
+            </main>
+        </div>
+        <div t-else="" class="o_estate_dashboard_loading">Chargement du tableau de bord…</div>
+    </t>
+</templates>

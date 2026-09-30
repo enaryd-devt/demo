@@ -1,0 +1,96 @@
+<odoo>
+    <record id="estate_schedule_action" model="ir.actions.act_window">
+        <field name="name">Échéances de loyers</field>
+        <field name="res_model">estate.rent.schedule</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="context">{'search_default_open': 1}</field>
+    </record>
+
+    <record id="estate_schedule_view_list" model="ir.ui.view">
+        <field name="name">estate.schedule.list</field>
+        <field name="model">estate.rent.schedule</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'late'" decoration-success="state == 'paid'">
+                <header>
+                    <button name="action_create_invoices_batch" type="object" string="Créer les factures" icon="fa-files-o" class="btn-primary" groups="account.group_account_invoice"/>
+                    <button name="action_confirm_invoices_batch" type="object" string="Confirmer les factures" icon="fa-check" groups="account.group_account_invoice"/>
+                    <button name="action_register_payments_batch" type="object" string="Régler les factures" icon="fa-money" groups="account.group_account_invoice"/>
+                </header>
+                <field name="name"/>
+                <field name="date_due"/>
+                <field name="tenant_id"/>
+                <field name="property_id"/>
+                <field name="unit_id"/>
+                <field name="invoice_id" optional="show"/>
+                <field name="total_amount"/>
+                <field name="paid_amount"/>
+                <field name="balance_amount"/>
+                <field name="late_days"/>
+                <field name="state" widget="badge"/>
+                <button name="action_create_invoice" type="object" icon="fa-file-text-o" title="Créer la facture" invisible="invoice_id" groups="account.group_account_invoice"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="estate_schedule_view_form" model="ir.ui.view">
+        <field name="name">estate.schedule.form</field>
+        <field name="model">estate.rent.schedule</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_create_invoice" type="object" string="Créer la facture" class="btn-primary" invisible="invoice_id" groups="account.group_account_invoice"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="lease_id"/>
+                            <field name="tenant_id" readonly="1"/>
+                            <field name="property_id" readonly="1"/>
+                            <field name="unit_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="period_start"/>
+                            <field name="period_end"/>
+                            <field name="date_due"/>
+                            <field name="late_days" readonly="1"/>
+                            <field name="invoice_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Montants">
+                        <field name="rent_amount"/>
+                        <field name="charge_amount"/>
+                        <field name="penalty_amount"/>
+                        <field name="discount_amount"/>
+                        <field name="total_amount" readonly="1"/>
+                        <field name="invoiced_amount" readonly="1"/>
+                        <field name="paid_amount" readonly="1"/>
+                        <field name="balance_amount" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="estate_schedule_view_search" model="ir.ui.view">
+        <field name="name">estate.schedule.search</field>
+        <field name="model">estate.rent.schedule</field>
+        <field name="arch" type="xml">
+            <search string="Rechercher une échéance">
+                <field name="tenant_id"/>
+                <field name="property_id"/>
+                <field name="unit_id"/>
+                <filter name="open" string="À payer" domain="[('balance_amount', '&gt;', 0)]"/>
+                <filter name="late" string="En retard" domain="[('state', '=', 'late')]"/>
+                <filter name="late7" string="Plus de 7 jours" domain="[('late_days', '&gt;', 7)]"/>
+                <filter name="late30" string="Plus de 30 jours" domain="[('late_days', '&gt;', 30)]"/>
+                <group expand="0" string="Regrouper par">
+                    <filter name="group_property" string="Immeuble" context="{'group_by': 'property_id'}"/>
+                    <filter name="group_tenant" string="Locataire" context="{'group_by': 'tenant_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

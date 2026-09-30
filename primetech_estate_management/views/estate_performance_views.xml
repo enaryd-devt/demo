@@ -1,0 +1,28 @@
+<odoo>
+    <record id="estate_property_view_form_performance" model="ir.ui.view">
+        <field name="name">estate.property.form.performance</field><field name="model">estate.property</field>
+        <field name="inherit_id" ref="primetech_estate_management.estate_property_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='unpaid_amount']" position="after">
+                <field name="annual_rent_potential"/><field name="annual_invoiced_amount"/>
+                <field name="annual_collected_amount"/><field name="gross_yield" widget="percentage"/>
+            </xpath>
+            <xpath expr="//field[@name='owner_id']" position="after"><field name="value"/><field name="annual_budget"/></xpath>
+        </field>
+    </record>
+    <record id="estate_unit_view_form_performance" model="ir.ui.view">
+        <field name="name">estate.unit.form.performance</field><field name="model">estate.unit</field>
+        <field name="inherit_id" ref="primetech_estate_management.estate_unit_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='current_lease_id']" position="after"><field name="unpaid_amount" readonly="1"/><field name="annual_invoiced_amount" readonly="1"/></xpath>
+        </field>
+    </record>
+    <record id="estate_lease_view_form_alerts" model="ir.ui.view">
+        <field name="name">estate.lease.form.alerts</field><field name="model">estate.lease</field>
+        <field name="inherit_id" ref="primetech_estate_management.estate_lease_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='due_day']" position="after"><field name="remaining_days" readonly="1"/><field name="notice_date"/><field name="renewal_date"/></xpath>
+            <xpath expr="//field[@name='note']" position="after"><field name="termination_reason"/></xpath>
+        </field>
+    </record>
+</odoo>
