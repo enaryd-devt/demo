@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 {
     "name": "PrimeTech Reporting Center",
+<<<<<<< HEAD
     "version": "18.0.1.0.1",
+=======
+    "version": "18.0.1.1.0",
+>>>>>>> cf63a5b (update)
     "category": "Reporting",
     "summary": "Tableaux de bord et rapports PDF/XLSX pour piloter l'entreprise",
     "description": """
@@ -58,6 +62,10 @@ de configuration, d'utilisation, de sécurité, de mise à jour et de désinstal
         # DASHBOARD (global)
         # =====================================================
         "views/dashboard/dashboard_action.xml",
+<<<<<<< HEAD
+=======
+        "views/dashboard/dashboard_report_preview_views.xml",
+>>>>>>> cf63a5b (update)
         "views/dashboard/placeholder_action.xml",
         "views/dashboard/audit_event_views.xml",
         "views/settings/res_config_settings_views.xml",
@@ -99,6 +107,15 @@ de configuration, d'utilisation, de sécurité, de mise à jour et de désinstal
         "report/pdf/accounting/invoice_analysis_templates.xml",
         "report/pdf/accounting/cash_period_report.xml",
         "report/pdf/accounting/cash_period_templates.xml",
+<<<<<<< HEAD
+=======
+        "report/pdf/dashboard/executive_cashflow_report.xml",
+        "report/pdf/dashboard/executive_cashflow_templates.xml",
+        "report/pdf/dashboard/executive_top_watch_report.xml",
+        "report/pdf/dashboard/executive_top_watch_templates.xml",
+        "report/pdf/dashboard/executive_partner_balance_report.xml",
+        "report/pdf/dashboard/executive_partner_balance_templates.xml",
+>>>>>>> cf63a5b (update)
         "report/pdf/accounting/trial_balance_templates.xml",
         "report/pdf/accounting/trial_balance_report.xml",
         "report/pdf/accounting/accounting_journal_templates.xml",

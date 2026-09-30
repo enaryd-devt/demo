@@ -1,13 +1,21 @@
 /** @odoo-module **/
 
+<<<<<<< HEAD
 import { Component, onMounted, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+=======
+import { Component, onMounted, onWillStart, onWillUnmount, useState } from "@odoo/owl";
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
+import { getDefaultCustomDateRange, getGlobalDateFilter, globalDateFilterPayload, setGlobalDateFilter, subscribeToGlobalDateFilter } from "../services/dashboard_state_service";
+>>>>>>> cf63a5b (update)
 
 export class SalesOverviewDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+<<<<<<< HEAD
         this.state = useState({ loaded: false, period: "month", data: {} });
         onWillStart(async () => this.refresh());
         onMounted(() => setTimeout(() => this.renderChart(), 100));
@@ -21,6 +29,50 @@ export class SalesOverviewDashboard extends Component {
     async refresh() {
         this.state.loaded = false;
         this.state.data = await this.orm.call("primetech.sales.overview", "get_dashboard_data", [{ period: this.state.period }]);
+=======
+        this.state = useState({ loaded: false, ...getGlobalDateFilter(), data: {} });
+        onWillStart(async () => this.refresh());
+        onMounted(() => {
+            this._unsubscribeGlobalDateFilter = subscribeToGlobalDateFilter((filter) => {
+                if (!this.isCurrentGlobalDateFilter(filter)) this.applyGlobalDateFilter(filter);
+            });
+            setTimeout(() => this.renderChart(), 100);
+        });
+        onWillUnmount(() => this._unsubscribeGlobalDateFilter?.());
+    }
+
+    isCurrentGlobalDateFilter(filter) {
+        return ["period", "dateFrom", "dateTo"].every((key) => this.state[key] === filter[key]);
+    }
+
+    async applyGlobalDateFilter(filter) {
+        Object.assign(this.state, filter);
+        await this.refresh();
+    }
+
+    async onGlobalPeriodChange(ev) {
+        let next = { period: ev.target.value, dateFrom: this.state.dateFrom, dateTo: this.state.dateTo };
+        if (next.period === "custom" && (!next.dateFrom || !next.dateTo)) {
+            next = { ...next, ...getDefaultCustomDateRange() };
+        }
+        Object.assign(this.state, next);
+        setGlobalDateFilter(next);
+        await this.refresh();
+    }
+
+    async onGlobalDateChange(field, ev) {
+        const next = { period: this.state.period, dateFrom: this.state.dateFrom, dateTo: this.state.dateTo, [field]: ev.target.value };
+        Object.assign(this.state, next);
+        if (next.dateFrom && next.dateTo && next.dateFrom <= next.dateTo) {
+            setGlobalDateFilter(next);
+            await this.refresh();
+        }
+    }
+
+    async refresh() {
+        this.state.loaded = false;
+        this.state.data = await this.orm.call("primetech.sales.overview", "get_dashboard_data", [globalDateFilterPayload(this.state)]);
+>>>>>>> cf63a5b (update)
         this.state.loaded = true;
         setTimeout(() => this.renderChart(), 0);
     }
