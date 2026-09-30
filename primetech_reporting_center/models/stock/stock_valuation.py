@@ -15,11 +15,6 @@ class StockValuationReport(models.AbstractModel):
             domain.append(('id', 'in', filters['product_ids']))
         if filters.get('category_ids'):
             domain.append(('categ_id', 'child_of', filters['category_ids']))
-<<<<<<< HEAD
-=======
-        if filters.get('supplier_ids'):
-            domain.append(('product_tmpl_id.seller_ids.partner_id', 'in', filters['supplier_ids']))
->>>>>>> cf63a5b (update)
         products = Product.search(domain, order='name')
         total_products = 0
         total_qty = 0.0
@@ -29,11 +24,6 @@ class StockValuationReport(models.AbstractModel):
         top_product_value = 0.0
         lines = []
         for product in products:
-<<<<<<< HEAD
-=======
-            supplier_name = product.product_tmpl_id.seller_ids[:1].partner_id.name or 'Sans fournisseur'
-            product_name = product.display_name
->>>>>>> cf63a5b (update)
             quant_domain = [('product_id', '=', product.id), ('location_id.usage', '=', 'internal')]
             if filters.get('location_ids'):
                 quant_domain.append(('location_id', 'in', filters['location_ids']))
@@ -50,11 +40,6 @@ class StockValuationReport(models.AbstractModel):
             if stock_value > top_product_value:
                 top_product_value = stock_value
                 top_product = product.name
-<<<<<<< HEAD
             lines.append({'product_id': product.id, 'product_name': product.display_name, 'default_code': product.default_code or '', 'category': product.categ_id.display_name or '', 'quantity': round(qty, 2), 'cost_price': round(cost_price, 2), 'stock_value': round(stock_value, 2)})
         lines = sorted(lines, key=lambda x: x['stock_value'], reverse=True)
-=======
-            lines.append({'product_id': product.id, 'product_name': product_name, 'supplier_name': supplier_name, 'default_code': product.default_code or '', 'category': product.categ_id.display_name or '', 'quantity': round(qty, 2), 'cost_price': round(cost_price, 2), 'stock_value': round(stock_value, 2)})
-        lines = sorted(lines, key=lambda x: (x['supplier_name'], -x['stock_value']) if filters.get('group_by_supplier') else -x['stock_value'])
->>>>>>> cf63a5b (update)
         return {'kpi': {'products_count': total_products, 'total_qty': round(total_qty, 2), 'stock_value': round(total_value, 2), 'average_cost': round(total_cost / total_products if total_products else 0, 2), 'top_product': top_product, 'top_product_value': round(top_product_value, 2)}, 'lines': lines}

@@ -11,11 +11,6 @@ class StockMovementWizard(models.TransientModel):
     warehouse_ids = fields.Many2many('stock.warehouse', string='Entrepôts')
     category_ids = fields.Many2many('product.category', string='Catégories')
     product_ids = fields.Many2many('product.product', string='Produits')
-<<<<<<< HEAD
-=======
-    supplier_ids = fields.Many2many('res.partner', string='Fournisseurs', domain=[('supplier_rank', '>', 0)])
-    group_by_supplier = fields.Boolean(string='Regrouper par fournisseur')
->>>>>>> cf63a5b (update)
     lot_ids = fields.Many2many('stock.lot', string='Lots')
     show_cost = fields.Boolean(string='Afficher les coûts', default=True)
     show_valuation = fields.Boolean(string='Afficher la valorisation', default=True)
@@ -24,11 +19,7 @@ class StockMovementWizard(models.TransientModel):
 
     def _prepare_filters(self):
         self.ensure_one()
-<<<<<<< HEAD
         return {'company_id': self.company_id.id, 'date_from': self.date_from, 'date_to': self.date_to, 'warehouse_ids': self.warehouse_ids.ids, 'category_ids': self.category_ids.ids, 'product_ids': self.product_ids.ids, 'lot_ids': self.lot_ids.ids, 'show_cost': self.show_cost, 'show_valuation': self.show_valuation, 'validated_only': self.validated_only, 'observations': self.observations}
-=======
-        return {'company_id': self.company_id.id, 'date_from': self.date_from, 'date_to': self.date_to, 'warehouse_ids': self.warehouse_ids.ids, 'category_ids': self.category_ids.ids, 'product_ids': self.product_ids.ids, 'supplier_ids': self.supplier_ids.ids, 'group_by_supplier': self.group_by_supplier, 'lot_ids': self.lot_ids.ids, 'show_cost': self.show_cost, 'show_valuation': self.show_valuation, 'validated_only': self.validated_only, 'observations': self.observations}
->>>>>>> cf63a5b (update)
 
     def action_preview(self):
         self.ensure_one()
